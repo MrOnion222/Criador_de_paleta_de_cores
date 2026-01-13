@@ -1,324 +1,74 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gerador de Paletas</title>
-
-<style>
-:root {
-  --bg: #121212;
-  --text: #f4f4f4;
-  --card: #1e1e1e;
-}
-
-[data-theme="light"] {
-  --bg: #f4f4f4;
-  --text: #222;
-  --card: #ffffff;
-}
-
-* {
-  box-sizing: border-box;
-  font-family: system-ui, sans-serif;
-}
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  padding: 20px;
-  transition: background .3s, color .3s;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-h1 {
-  font-size: 2.8rem;
-  margin-bottom: 20px;
-}
-
-.controls {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.control-group {
-  display: flex;
-  flex-direction: column;
-  font-size: .8rem;
-  min-width: 160px;
-}
-
-input[type="color"] {
-  width: 55px;
-  height: 42px;
-  border: none;
-  cursor: pointer;
-}
-
-input[type="range"] {
-  width: 100%;
-}
-
-button {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #6366f1;
-  color: #fff;
-  transition: background .3s, transform .2s;
-}
-
-button:hover {
-  transform: translateY(-2px);
-}
-
-section {
-  margin-top: 30px;
-}
-
-.palette-group {
-  margin-bottom: 40px;
-}
-
-.palette-title {
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.palette {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.card {
-  background: var(--card);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0,0,0,.25);
-  transition: transform .2s;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-}
-
-.color-preview {
-  height: 90px;
-}
-
-.card-content {
-  padding: 10px;
-  font-size: .85rem;
-}
-
-.card-content span {
-  display: block;
-  margin-bottom: 4px;
-}
-
-.copy {
-  background: none;
-  border: none;
-  color: #8b8dff;
-  cursor: pointer;
-  padding: 0;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>MrOnion's Devlog</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="icon.png">
 </head>
 
-<body>
-<header>
-  <h1>🎨 Gerador de Paletas</h1>
-
-  <div class="controls">
-    <input type="color" id="colorPicker">
-
-    <button onclick="addColor()">Adicionar cor</button>
-    <button onclick="exportTXT()">Exportar TXT</button>
-    <button onclick="exportPNG()">Exportar PNG</button>
-    <button onclick="toggleTheme()">🌙 / ☀️</button>
-
-    <div class="control-group">
-      <label>Temperatura (Hue)</label>
-      <input type="range" id="tempRange" min="0" max="40" value="15" oninput="renderPalettes()">
-    </div>
-
-    <div class="control-group">
-      <label>Tom / Luminosidade</label>
-      <input type="range" id="lightRange" min="5" max="40" value="20" oninput="renderPalettes()">
-    </div>
-  </div>
-</header>
-
-<section id="palettes"></section>
-
 <script>
-let baseColors = [];
-let darkMode = true;
+  // senha correta
+  const password1 = atob("YXlzbGFucGFzc3dvcmQ=");
+  const password2 = atob("MDcxMDEy");
 
-/* ---------- Tema ---------- */
-function toggleTheme() {
-  darkMode = !darkMode;
-  document.documentElement.dataset.theme = darkMode ? "dark" : "light";
-}
+  const isDev =
+  (
+    location.protocol === "file:"
+  );
 
-/* ---------- Cores ---------- */
-function addColor() {
-  const color = document.getElementById("colorPicker").value;
-  baseColors.push(color);
-  renderPalettes();
-}
+if(false)
+{
+  const input  = prompt("Senha:");
 
-function hexToHSL(hex) {
-  let r = parseInt(hex.substr(1,2),16)/255;
-  let g = parseInt(hex.substr(3,2),16)/255;
-  let b = parseInt(hex.substr(5,2),16)/255;
-
-  let max = Math.max(r,g,b), min = Math.min(r,g,b);
-  let h, s, l = (max + min) / 2;
-
-  if(max === min) {
-    h = s = 0;
-  } else {
-    let d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch(max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-    }
-    h *= 60;
+  if(input !== password1 && input !== password2)
+  {
+    window.location.href = "deined.html";
   }
-  return { h, s: s*100, l: l*100 };
-}
-
-function hslToHex(h,s,l) {
-  s/=100; l/=100;
-  let c=(1-Math.abs(2*l-1))*s;
-  let x=c*(1-Math.abs((h/60)%2-1));
-  let m=l-c/2;
-  let r=0,g=0,b=0;
-
-  if(h<60){r=c;g=x;}
-  else if(h<120){r=x;g=c;}
-  else if(h<180){g=c;b=x;}
-  else if(h<240){g=x;b=c;}
-  else if(h<300){r=x;b=c;}
-  else{r=c;b=x;}
-
-  r=Math.round((r+m)*255);
-  g=Math.round((g+m)*255);
-  b=Math.round((b+m)*255);
-
-  return "#" + [r,g,b].map(v=>v.toString(16).padStart(2,"0")).join("");
-}
-
-function generateVariations(hex) {
-  const hsl = hexToHSL(hex);
-  const temp = parseInt(document.getElementById("tempRange").value);
-  const light = parseInt(document.getElementById("lightRange").value);
-
-  return [
-    { label: "Base", color: hex },
-    {
-      label: "Clara & quente",
-      color: hslToHex(hsl.h + temp, hsl.s, Math.min(hsl.l + light, 90))
-    },
-    {
-      label: "Fria & escura",
-      color: hslToHex(hsl.h - temp, hsl.s, Math.max(hsl.l - light, 10))
-    },
-    {
-      label: "Fria & escura",
-      color: hslToHex(hsl.h - temp * 1.5, hsl.s, Math.max(hsl.l - light * 1.5, 5))
-    }
-  ];
-}
-
-/* ---------- Render ---------- */
-function renderPalettes() {
-  const container = document.getElementById("palettes");
-  container.innerHTML = "";
-
-  baseColors.forEach(base => {
-    const group = document.createElement("div");
-    group.className = "palette-group";
-
-    const title = document.createElement("div");
-    title.className = "palette-title";
-    title.textContent = `Cor base: ${base}`;
-    group.appendChild(title);
-
-    const palette = document.createElement("div");
-    palette.className = "palette";
-
-    const baseVars = generateVariations(base);
-    const compHue = (hexToHSL(base).h + 180) % 360;
-    const compHex = hslToHex(compHue, 60, 50);
-    const compVars = generateVariations(compHex).map(v => ({
-      ...v,
-      label: "Complementar – " + v.label
-    }));
-
-    [...baseVars, ...compVars].forEach(v => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="color-preview" style="background:${v.color}"></div>
-        <div class="card-content">
-          <span><strong>${v.label}</strong></span>
-          <span>${v.color}</span>
-          <button class="copy" onclick="navigator.clipboard.writeText('${v.color}')">Copiar</button>
-        </div>`;
-      palette.appendChild(card);
-    });
-
-    group.appendChild(palette);
-    container.appendChild(group);
-  });
-}
-
-/* ---------- Exportar TXT ---------- */
-function exportTXT() {
-  const colors = document.querySelectorAll(".card-content span:nth-child(2)");
-  let text = "";
-  colors.forEach(c => text += c.textContent + "\n");
-
-  const blob = new Blob([text], {type: "text/plain"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "paleta.txt";
-  a.click();
-}
-
-/* ---------- Exportar PNG ---------- */
-function exportPNG() {
-  const colors = [...document.querySelectorAll(".card-content span:nth-child(2)")].map(e => e.textContent);
-  const size = 100;
-  const canvas = document.createElement("canvas");
-  canvas.width = colors.length * size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d");
-
-  colors.forEach((c, i) => {
-    ctx.fillStyle = c;
-    ctx.fillRect(i * size, 0, size, size);
-  });
-
-  const a = document.createElement("a");
-  a.href = canvas.toDataURL("image/png");
-  a.download = "paleta.png";
-  a.click();
 }
 </script>
+
+<body>
+
+  <div class="main">
+    <h1>MrOnion's Devlog</h1>
+    <h2>Diário de desenvolvimento do MrOnion</h2>
+    
+    <br><br><br>
+
+    <div class="captions">
+      <a href="insanebombs.html">
+        <div class="caption">
+        <img class="pixel" src="imgs/Insanebombs.gif" alt="Insanebombs">
+        <p>Insanebombs</p>
+        </div>
+      </a>
+
+      <a href="index.html">
+        <div class="caption">
+        <img class="pixel" src="imgs/the-mask-s-adventure.png" alt="Insanebombs">
+        <p>The Mask's Adventure</p>
+        </div>
+      </a>
+      
+    </div>
+
+  </div>
+
 </body>
+<div class="side-menu">
+  <a href="https://www.youtube.com/@AyslanNuness" target="_blank" aria-label="YouTube Channel">
+    <div class="menu">
+      <img src="imgs/yt_logo.png" alt="YouTube">
+      <p>Youtube</p>
+    </div>
+  </a>
+
+  <a href="https://mr-onion-games.itch.io" target="_blank" aria-label="Itch io">
+    <div class="menu">
+      <img src="imgs/itch_io_logo.png" alt="Itch io">
+      <p>Itch io</p>
+    </div>
+  </a>
+</div>
 </html>
